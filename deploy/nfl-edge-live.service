@@ -1,0 +1,13 @@
+[Unit]
+Description=NFL EDGE live slate (same product slots as US EDGE)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/nfl-edge
+Environment=TZ=America/New_York
+Environment=PYTHONPATH=/root/nfl-edge
+ExecStart=/root/nfl-edge/venv/bin/python /root/nfl-edge/scripts/run_nfl_edge.py --live
+StandardOutput=append:/root/nfl-edge/logs/run.log
+StandardError=append:/root/nfl-edge/logs/run.log
