@@ -1,5 +1,7 @@
 # NFL EDGE
 
+> **Operator 2026-08-08: push messaging removed entirely.** Every push alert this document historically described is gone. Outcomes are silent; state lives in logs, telemetry, the sheet and the delivery surfaces.
+
 Quantitative **NFL-only** betting edge service. Sibling of **NBA EDGE / MLB EDGE** (architecture) and **US EDGE** (delivery format + GQ Sports grader).
 
 > **STATUS: BUILT DORMANT (2026-08-01).** Season starts ~Sept 10 — the timer is deployed
@@ -41,7 +43,6 @@ Never leave the VPS on older code than `origin/main`.
 - **Brain:** **claude-opus-5** (effort **max**, 3 tries) → **gpt-5.6-sol** (effort **high**) → **edge-rank**; the composer is the **QB availability veto** (backup QB starting → skip unless the case survives)
 - **Delivery:** Whop (sports exp, title stays `US EDGE`) + GQ Sports grader webhook (claim-first) + Gmail if enabled — email subject is `NFL EDGE`
 
-Silence is valid. Honest no-picks → private ntfy `Stuki71-EDGE` title `NFL EDGE @ No picks for today` (operator-only).
 
 ## Why these slots
 

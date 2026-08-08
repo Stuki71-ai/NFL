@@ -1,5 +1,7 @@
 # NFL EDGE — Operations
 
+> **Operator 2026-08-08: push messaging removed entirely.** Every push alert this document historically described is gone — no OK/NOT-OK, no no-picks, no criticals, no error-workflow pings. Outcomes are silent; state lives in logs, telemetry, the sheet and the delivery surfaces.
+
 > **DORMANT BY DESIGN (built 2026-08-01)** — timer disabled + `STOPPED` flag present until the
 > 2026-27 season. Activation is a one-command operator decision (see **Activation** below).
 
@@ -103,13 +105,11 @@ python scripts/sync_all.py --push
 |---|---|
 | **Whop** title | **`US EDGE · …`** (same sports room as before) |
 | **Email** subject | `NFL EDGE \| …` |
-| Operator ntfy | `NFL EDGE …` |
 
 ## AI brain autonomy (standing order — EDGE family / US EDGE lead)
 
 In case of any errors, the **AI brain is solely responsible for autonomous resolution** (honest `[]` / silence / shortlist-only / composer ladder → edge-rank — never invent teams, prices, or facts). Infrastructure retries transport failures before escalating.
 
-**Notify via ntfy only if ALL THREE hold:**
 
 1. **Production-critical** (subscriber delivery dead, pipeline cannot ship a live slate, secrets missing for live),  
 2. **Could not be resolved after repeated autonomous attempts**, and  
@@ -118,13 +118,8 @@ In case of any errors, the **AI brain is solely responsible for autonomous resol
 | Situation | Behaviour |
 |---|---|
 | Honest no-picks / empty shortlist | Customers silence; private `Stuki71-EDGE` (not critical) |
-| All same-day dupes | Silence; **no** ntfy |
-| Composer fail | Ladder 3×high → 3×medium → 3×low → **edge-rank**; no ntfy if fallback ships |
-| Delivery channel blip | **3 attempts** with backoff; critical ntfy only if still dead |
-| Preflight missing secrets (live) | Critical ntfy once (cannot spend APIs / cannot wait) |
-| Uncaught pipeline crash (live) | Critical ntfy once |
 
-## ntfy
+## Outcome policy (push alerts removed 2026-08-08)
 
 | Event | Topic | Title |
 |---|---|---|

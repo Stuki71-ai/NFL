@@ -9,7 +9,6 @@ import requests
 
 from nfl_edge.config import env
 
-
 def build_email_html(picks: list[dict[str, Any]]) -> tuple[str, str]:
     from datetime import datetime
     from zoneinfo import ZoneInfo
@@ -169,49 +168,7 @@ def post_grader(picks: list[dict[str, Any]]) -> tuple[bool, list[str]]:
     return True, [str(k) for k in keys]
 
 
-# ntfy replaces a truly empty body with the literal text "triggered" — a zero-width
 # space is the only payload that renders as a blank body (operator order: empty body).
 _NTFY_EMPTY_BODY = "​".encode("utf-8")
 
-
-def ntfy_no_picks() -> None:
-    try:
-        requests.post(
-            "https://ntfy.sh/Stuki71-EDGE",
-            headers={"Title": "NFL EDGE @ No picks for today"},
-            data=_NTFY_EMPTY_BODY,
-            timeout=15,
-        )
-    except Exception:
-        pass
-
-
-def ntfy_no_new_picks(slot_label: str) -> None:
-    """Operator info: a later same-day run produced no NEW picks (all already shipped).
-    Normal priority, empty body — title carries the run's slot time (operator order 2026-08-01)."""
-    try:
-        requests.post(
-            "https://ntfy.sh/Stuki71-EDGE",
-            headers={"Title": f"NFL - No new picks @ {slot_label}", "Priority": "default"},
-            data=_NTFY_EMPTY_BODY,
-            timeout=15,
-        )
-    except Exception:
-        pass
-
-
-def ntfy_critical(title: str, msg: str) -> None:
-    # EDGE family: ONLY critical (urgent) or no-picks — both on Stuki71-EDGE.
-    try:
-        requests.post(
-            "https://ntfy.sh/Stuki71-EDGE",
-            headers={
-                "Title": title,
-                "Priority": "urgent",
-                "Tags": "rotating_light,nfl-edge",
-            },
-            data=str(msg)[:500].encode(),
-            timeout=15,
-        )
-    except Exception:
-        pass
+# Push messaging removed entirely (operator 2026-08-08): every outcome is log/telemetry only.

@@ -1,6 +1,7 @@
 # NFL EDGE — Design
 
-**Brand:** NFL EDGE (email/ntfy) · `US EDGE` on Whop (same sports room)  
+> **Operator 2026-08-08: push messaging removed entirely.** Every push alert this document historically described is gone — no OK/NOT-OK, no no-picks, no criticals, no error-workflow pings. Outcomes are silent; state lives in logs, telemetry, the sheet and the delivery surfaces.
+
 **Sibling of:** NBA EDGE / MLB EDGE (architecture), US EDGE (delivery/grader), NIGHT EDGE (quant lineage)  
 **Status:** v1 Python service, built dormant 2026-08-01 — GitHub `Stuki71-ai/NFL`
 
@@ -45,7 +46,6 @@ systemd timer (ET)
 [7] Delivery       grader claim FIRST (family dedupe) → Whop + email (if enabled)
 ```
 
-Silence is valid: empty shortlist or brain `[]` → no customer delivery; private no-picks ntfy.
 
 ## Markets (v1)
 

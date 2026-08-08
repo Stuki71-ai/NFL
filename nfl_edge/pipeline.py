@@ -3,7 +3,6 @@ from __future__ import annotations
 # ERROR POLICY (EDGE family / US EDGE lead):
 #   In case of any errors, the AI brain is solely responsible for autonomous resolution
 #   (composer ladder → edge-rank; honest []; shortlist-only — never invent data).
-#   ntfy ONLY when ALL three hold:
 #     (1) production-critical
 #     (2) exhausted repeated autonomous attempts
 #     (3) resolution cannot wait for the next scheduled slot
@@ -41,7 +40,7 @@ def _write_run(date_et: str, report: dict[str, Any]) -> None:
 
 
 def _deliver_channel(name: str, fn: Callable[[], bool]) -> bool:
-    """Autonomous retries; returns True if any attempt succeeds. Caller ntfys only on False."""
+    """Autonomous retries; returns True if any attempt succeeds. Caller handles False silently."""
     last = ""
     for i in range(DELIVERY_ATTEMPTS):
         try:
@@ -100,7 +99,6 @@ def run(
                 report["stage"] = f"preflight-fail: {msg}"
                 report["preflight_missing"] = miss
                 print(f"[preflight] {msg}")
-                delivery.ntfy_critical("NFL EDGE CRITICAL: preflight secrets", msg)
                 (OUT / "last_error.json").write_text(
                     json.dumps(report, indent=2, default=str), encoding="utf-8"
                 )
@@ -110,7 +108,7 @@ def run(
         print(f"[1] Fetch odds slate… date_et={date_et}")
         t0 = time.perf_counter()
         is_today = date_et == datetime.now(ET).strftime("%Y-%m-%d")
-        slot_label = datetime.now(ET).strftime("%H:%M") + " ET"  # this run's fire time (title of no-new-picks ntfy)
+        slot_label = datetime.now(ET).strftime("%H:%M") + " ET"  # this run's fire time
         if is_today:
             events, remaining = slate.fetch_odds(date_et=None)
             events = slate.filter_slate(events)
@@ -169,7 +167,7 @@ def run(
         if not cands:
             report["stage"] = "no-candidates"
             if not dry_run:
-                delivery.ntfy_no_picks()
+                pass  # push alert removed (operator 2026-08-08)
             _write_run(date_et, report)
             return report
 
@@ -235,7 +233,6 @@ def run(
                 f"[dedupe] already shipped {len(already)} pick(s) for {date_et} — "
                 "silence (one customer proposal per ET day; no 2nd round)"
             )
-            delivery.ntfy_no_new_picks(slot_label)
             _write_run(date_et, report)
             return report
 
@@ -250,10 +247,7 @@ def run(
                 report["stage"] = "pipeline-error: shared-dedupe-sheet"
                 report["ok"] = False
                 if not dry_run:
-                    delivery.ntfy_critical(
-                        "NFL EDGE CRITICAL: shared dedupe sheet",
-                        f"cannot load shared Picks keys for family dedupe: {e}",
-                    )
+                    pass  # push alert removed (operator 2026-08-08)
                 _write_run(date_et, report)
                 return report
         fresh, dups = drop_already_sent(picks, already, shared_claim_keys=shared)
@@ -275,17 +269,16 @@ def run(
         report["picks_n"] = len(picks)
 
         if not picks:
-            # Honest empty vs all dups: silence either way; no-picks ntfy only if not pure dups
             if dups:
                 report["stage"] = "all-dupes"
                 report["ok"] = True  # healthy multi-cron / cross-product re-fire
                 print("[dedupe] all picks already sent (local or family sheet) — silence")
                 if not dry_run:
-                    delivery.ntfy_no_new_picks(slot_label)
+                    pass  # push alert removed (operator 2026-08-08)
             else:
                 report["stage"] = "no-picks"
                 if not dry_run:
-                    delivery.ntfy_no_picks()
+                    pass  # push alert removed (operator 2026-08-08)
             _write_run(date_et, report)
             return report
 
@@ -309,10 +302,6 @@ def run(
                 return ok_c
 
             if not _deliver_channel("grader", _claim):
-                delivery.ntfy_critical(
-                    "NFL EDGE CRITICAL: grader failed",
-                    f"grader claim dead after {DELIVERY_ATTEMPTS} autonomous attempts",
-                )
                 report["delivery"] = {"grader": False, "email": False, "whop": False}
                 print("[dedupe] grader claim failed — no email/Whop")
                 _write_run(date_et, report)
@@ -329,7 +318,6 @@ def run(
                 report["picks_n"] = 0
                 report["delivery"] = {"grader": True, "email": False, "whop": False}
                 print("[dedupe] grader accepted 0 keys (already on sheet / US EDGE) — silence")
-                delivery.ntfy_no_new_picks(slot_label)
                 _write_run(date_et, report)
                 return report
 
@@ -348,10 +336,7 @@ def run(
                 ok = _deliver_channel(name, fn)
                 delivery_ok[name] = ok
                 if not ok:
-                    delivery.ntfy_critical(
-                        f"NFL EDGE CRITICAL: {name} failed",
-                        f"{name} dead after {DELIVERY_ATTEMPTS} autonomous attempts",
-                    )
+                    pass  # push alert removed (operator 2026-08-08)
             report["delivery"] = delivery_ok
             # Record local last_sent for multi-cron; sheet already has claim keys
             if any(delivery_ok.get(k) for k in ("email", "whop", "grader")):
@@ -368,7 +353,7 @@ def run(
         report["trace"] = traceback.format_exc()
         print(report["trace"])
         if not dry_run:
-            delivery.ntfy_critical("NFL EDGE CRITICAL: pipeline error", str(e))
+            pass  # push alert removed (operator 2026-08-08)
         (OUT / "last_error.json").write_text(
             json.dumps(report, indent=2, default=str), encoding="utf-8"
         )
